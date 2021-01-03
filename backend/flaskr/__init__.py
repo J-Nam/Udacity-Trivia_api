@@ -91,7 +91,8 @@ def create_app(test_config=None):
       question = Question.query.get(id)
       question.delete()
       return jsonify({
-        "success": True
+        "success": True,
+        "deleted_question": question.format()
       })
     except Exception:
       db.session.rollback()
@@ -118,7 +119,8 @@ def create_app(test_config=None):
       new_question = Question(question=question, answer=answer, category=category, difficulty=difficulty)
       new_question.insert()
       return jsonify({
-        "success": True
+        "success": True,
+        "new question": new_question.format()
       })
     except:
       db.session.rollback()
