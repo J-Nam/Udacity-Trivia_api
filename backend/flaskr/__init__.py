@@ -65,6 +65,7 @@ def create_app(test_config=None):
     def get_paginated_questions():
         try:
             page = int(request.args.get('page'))
+            print(page)
             questionsQuery = Question.query.all()
             questions = [question.format() for question in questionsQuery]
             start = (page - 1) * QUESTIONS_PER_PAGE
@@ -73,6 +74,10 @@ def create_app(test_config=None):
             query = Category.query.all()
             for category in query:
                 categories[category.id] = category.type
+        except Exception:
+            abort(404)
+
+        if len(questions[start:end]) != 0:
             return jsonify({
               "success": True,
               "questions": questions[start:end],
@@ -80,7 +85,7 @@ def create_app(test_config=None):
               "categories": categories,
               "current_category": None
             })
-        except Exception:
+        else:
             abort(404)
 
     '''
@@ -172,13 +177,17 @@ def create_app(test_config=None):
         try:
             questions = Question.query.filter_by(category=category_id).all()
             formatted_questions = [question.format() for question in questions]
+        except Exception:
+            abort(404)
+
+        if len(formatted_questions) != 0:
             return jsonify({
               "success": True,
               "questions": formatted_questions,
               "total_questions": len(formatted_questions),
               "current_category": category_id
             })
-        except Exception:
+        else:
             abort(404)
 
     '''
@@ -207,12 +216,17 @@ def create_app(test_config=None):
             else:
                 questions = Question.query.filter_by(category=quiz_category['id']).filter(~Question.id.in_(previous_questions)).all()
 
-            random_question = random.choice(questions)
-            formatted_random_question = random_question.format()
-            return jsonify({
-              "success": True,
-              "question": formatted_random_question
-            })
+            if len(questions) == 0:
+                return jsonify({
+                  "success": True
+                })
+            else:
+                random_question = random.choice(questions)
+                formatted_random_question = random_question.format()
+                return jsonify({
+                  "success": True,
+                  "question": formatted_random_question
+                })
         except Exception:
             abort(404)
 
